@@ -231,9 +231,9 @@ QPSK_Link_Teaching/
 如本项目对你的工作有帮助，可参考：
 
 ```bibtex
-@misc{fluuzugrzt2026qpsk,
+@misc{chentong06012026qpsk,
   title  = {QPSK_Link_Teaching: QPSK over-the-air link with ADALM-Pluto},
-  author = {fluuzugrzt},
+  author = {chentong0601},
   year   = {2026},
   note   = {MATLAB R2024b, ADALM-Pluto SDR}
 }
