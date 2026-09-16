@@ -26,7 +26,7 @@ QPSK_Link_Teaching (本工程)     ← 复用其 tx_baseband/rx_baseband, 新增
 | P1 | **公网信号接收（扫频 + PSD + ADC 饱和诊断）** | ✅ | `main_p1_public_signal.m` + 报告 |
 | P5 | 端到端视频联调 + 实时性优化（135%→75.6%） | ✅ | `main_p5_e2e_video.m` |
 | P6 | **真实空口联调（物理层 952/952，PSNR 36.76 dB）** | ✅ | `main_p6_link_test.m` / `main_p6_video_overair.m` |
-| E4 | **四类内容业务 × 三链路（文字/图片/音频/视频）** | ✅ | `main_e4_*.m` + `results/e4/` |
+| E4 | **四类内容业务 × 三链路（文字/图片/音频/视频）** | ✅ | `main_e4_*.m` + `experiments/e4_*.m` |
 
 **关键成果**：
 
@@ -75,19 +75,11 @@ QPSK_Link_Teaching/
 │   ├── video_reassembler.m        # 状态机重组（丢帧/重复统计）
 │   ├── video_testframe.m          # 三档复杂度测试帧
 │   └── slice_budget.m             # ★ 分片预算(由 p 推算可用视频参数)
-├── 博士课程-无线/                  # ★ 课程交付（实验3）
-│   ├── 课程要求与参考案例-摘录.md   #   课程要求 + 参考案例文本摘录
-│   ├── 实验3-构建通信收发机-实施方案.md  # ★ 实验3 完整实现方案
-│   ├── 实验3-P0-环境确认报告.md     #   P0 环境与 JPEG 编解码定型
-│   ├── 实验3-P2-E3-视频链路与参数权衡.md  # ★ P2/E3 实测与三档工作模式
-│   ├── 实验3-P5-端到端联调与实时性剖析.md # ★ P5 端到端 + 性能优化
-│   ├── 实验3-P1-公网信号接收教程.md       # ★ P1 公网信号接收教程
-│   ├── 实验3-P1-公网信号接收报告.md       # ★ P1 报告(含信号识别速查表)
-│   ├── 实验3-P6-空口联调运行教程.md       # ★ P6 空口操作手册(需 GUI)
-│   ├── 实验3-P6-空口联调报告.md           # ★ P6 实测报告(PSNR 36.76dB + 排查方法论)
-│   ├── 18课时-综合实验要求（完整）.pptx
-│   └── 2026-2027学年第一学期-课程计划.docx
-├── experiments/                   # 诊断脚本(调试过程记录)
+├── experiments/                   # 实验与诊断脚本
+│   ├── rx_sanity_check.m          #   接收数据三步体检链
+│   ├── plot_p1_gain_sweep.m       #   P1 增益扫描对照图
+│   ├── e4_*.m                     #   四类业务实验与绘图
+│   └── content_check.m            #   素材规格自检
 ├── notes/
 │   ├── ref_INDEX.md               # ★ 参考资料索引（外部文档统一入口）
 │   ├── spec_for_review.md         # ★ 方案说明书（评审版，可交外部审核）
@@ -120,7 +112,7 @@ QPSK_Link_Teaching/
 ├── main_p1_public_signal.m        # ★ P1 公网信号接收(扫频+PSD, 保底功能)
 ├── main_p6_link_test.m            # ★ P6a 空口链路质量评估(测单帧成功率 p)
 ├── main_p6_video_overair.m        # ★ P6b 空口视频传输(需 GUI + 硬件)
-├── plots/ results/                # 运行产物 (gitignored)
+├── plots/                         # 成果图表（入库，可由脚本复现）
 ```
 
 ## 运行约定
@@ -190,33 +182,32 @@ main_p6_link_test      % 空口链路质量（单帧成功率 p）
 
 ## 数据可得性
 
-原始采集数据为 GB 级，不纳入版本库。本地保留的**权威数据集**为 6 个文件：
+**本仓库只包含可复用的工程代码与成果图，不含实验原始数据。**
 
-| 文件 | 用途 |
-|---|---|
-| `results/p1_public_20260912_160606.mat` | gain=30 饱和基线（ADC 削顶对照） |
-| `results/p1_g23_20260912_173402.mat` | gain=23 锁定 ch6 |
-| `results/p1_g10_20260912_174527.mat` | gain=10 锁定 ch6（最优工作点） |
-| `results/p1_g10_20260912_173601.mat` | gain=10 未锁定（旁证：该增益不削顶） |
-| `results/p1_g0_20260912_174758.mat` | gain=0 锁定 ch6（最低噪声底） |
-| `results/p1_public_20260912_171612.mat` | LTE Band 3 频谱特征 |
+原始采集数据（GB 级）与实验运行产物均保留在本地，未纳入版本库：
 
-四类业务（E4）与接收机性能（EVM / 天线频响）的测得数据以 **CSV / PNG / Markdown**
-形式随库提供，位于 `results/e4/`，可直接查看而无需 MATLAB。
+| 内容 | 本地位置 | 说明 |
+|---|---|---|
+| P1 公网信号采集 | `results/p1_public_*.mat` | 6 个权威数据集（增益 0/10/23/30 dB 对照 + LTE Band 3） |
+| E4 四类业务结果 | `results/e4/` | sim / coax / short / long 四条件的收发对照与性能数据 |
+| 业务素材本体 | `content/` | 照片、语音及其处理规格族 |
 
-### 隐私说明
+成果图（`plots/`）已入库，可由 `main_*.m` 脚本重新生成，无需原始数据即可查看结论。
 
-为保护个人信息，以下文件未纳入版本库（本地保留）：文字业务的传输载荷
-（含署名）、含居住地信息的音频素材、以及含署名的课程报告成稿。
-如需完整数据请联系作者。
+### 为什么这些内容不入库
+
+- **课程材料**：课程要求、实施方案与实验报告属个人课程交付，与工程本身无关
+- **个人素材**：文字业务载荷含署名、语音素材文件名含居住地信息
+- **大体积数据**：原始 IQ 采集为 GB 级，不适合版本控制
 
 ## 图表预览
 
 | 图 | 位置 |
 |---|---|
-| 三链路 EVM 浴缸曲线 | `plots/e4/`、`博士课程-无线/fig_full/` |
-| 公网信号六联图（WiFi / GSM900 / LTE） | `博士课程-无线/fig_full/p1_public_signal_*.png` |
-| 四类内容业务结果（文字/图片/音频/视频 × 三链路） | `博士课程-无线/fig_full/e4_*.png` |
+| 四类业务 × 四条件结果（文字/图片/音频/视频） | `plots/e4/` |
+| 三链路 EVM 浴缸曲线 | `plots/e4/fig_evm_bathtub_*.png` |
+| 天线耦合频率扫描对比 | `plots/e4/fig_antsweep_*.png` |
+| 公网信号四频段频谱 | `plots/p1_public_signal_*.png` |
 | 空口联调结果 | `plots/p6_overair_video.png` |
 | 交互式成果展示页 | `index.html`（单页，浏览器直接打开） |
 
@@ -224,33 +215,25 @@ main_p6_link_test      % 空口链路质量（单帧成功率 p）
 
 ```
 QPSK_Link_Teaching/
-├── content/                       # 业务内容素材（音频/图片/视频）
-│   ├── README.md                  #   素材说明与规格
-│   ├── processed/                 #   已按传输需求预处理（分辨率/量化/采样率）
-│   └── 素材体检报告.md             #   素材规格体检结论
-├── experiments/                   # 诊断与绘图脚本
-│   ├── e4_*.m                     #   四类业务实验与绘图
-│   ├── plot_p1_gain_sweep.m       #   P1 增益扫描对照图
-│   ├── rx_sanity_check.m          #   接收数据三步体检链
-│   └── diag_p6_rxwave.m           #   空口波形/星座诊断
+├── content/
+│   └── README.md                  # 素材规格与分片策略（素材本体不入库）
 ├── gui/                           # 成果展示台（sdr_showcase）
 ├── index.html                     # 交互式成果展示页（21 图）
-└── plots/ results/                # 运行产物（结果表格/图表入库，原始 .mat 不入库）
+└── plots/                         # 成果图表（入库，可由脚本复现）
 ```
 
 ## 许可
 
 代码以 **MIT License** 发布，见 `LICENSE`。
-课程材料（`博士课程-无线/*.pptx`、`*.docx`）版权归课程教师，不在许可范围内。
 
 ## 引用
 
 如本项目对你的工作有帮助，可参考：
 
 ```bibtex
-@misc{chentong2026qpsk,
+@misc{fluuzugrzt2026qpsk,
   title  = {QPSK_Link_Teaching: QPSK over-the-air link with ADALM-Pluto},
-  author = {ChenTong},
+  author = {fluuzugrzt},
   year   = {2026},
   note   = {MATLAB R2024b, ADALM-Pluto SDR}
 }
