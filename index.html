@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实验3 通信收发机 — 成果展示</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --text:#1f2430; --sub:#6b7280;
+    --head:#2c354a; --primary:#2d5bff; --ok:#12a150; --warn:#e8871e; --bad:#d93f3f;
+    --line:#e2e7f0; --radius:14px; --shadow:0 1px 3px rgba(20,30,60,.06),0 8px 24px rgba(20,30,60,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text); line-height:1.65;
+    font-family:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB",-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+
+  /* ---------- Header ---------- */
+  header{
+    background:linear-gradient(135deg,#1b2440 0%,#2d5bff 130%);
+    color:#fff; padding:56px 0 48px; margin-bottom:34px;
+  }
+  header .tag{
+    display:inline-block; font-size:12.5px; letter-spacing:.08em;
+    background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);
+    padding:4px 12px; border-radius:99px; margin-bottom:18px;
+  }
+  header h1{font-size:34px;font-weight:700;letter-spacing:-.01em;margin-bottom:10px}
+  header .sub{font-size:15px;color:rgba(255,255,255,.82);max-width:820px}
+  header .meta{margin-top:20px;font-size:13px;color:rgba(255,255,255,.62)}
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px;margin-bottom:40px}
+  .kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;border:1px solid var(--line)}
+  .kpi .lab{font-size:13px;color:var(--sub);margin-bottom:8px}
+  .kpi .val{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .kpi .note{font-size:12.5px;color:var(--sub);margin-top:8px}
+
+  /* ---------- Section ---------- */
+  section{margin-bottom:46px}
+  h2.sec{
+    font-size:21px;font-weight:700;color:var(--head);margin-bottom:6px;
+    display:flex;align-items:center;gap:10px;
+  }
+  h2.sec .idx{
+    font-size:13px;font-weight:700;color:var(--primary);
+    background:rgba(45,91,255,.1);padding:2px 10px;border-radius:99px;
+  }
+  .sec-note{font-size:13.5px;color:var(--sub);margin-bottom:20px}
+
+  /* ---------- Gallery ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+  figure{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
+    transition:transform .16s ease,box-shadow .16s ease;
+  }
+  figure:hover{transform:translateY(-3px);box-shadow:0 4px 10px rgba(20,30,60,.08),0 16px 40px rgba(20,30,60,.1)}
+  figure img{width:100%;display:block;background:#fbfcfe;cursor:zoom-in;aspect-ratio:4/3;object-fit:contain}
+  figcaption{padding:14px 16px 16px;border-top:1px solid var(--line)}
+  figcaption .t{font-size:14.5px;font-weight:700;color:var(--head);margin-bottom:6px}
+  figcaption .d{font-size:13px;color:var(--sub)}
+
+  .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:99px;margin-left:8px;vertical-align:2px}
+  .b-ok{background:rgba(18,161,80,.12);color:var(--ok)}
+  .b-warn{background:rgba(232,135,30,.14);color:var(--warn)}
+  .b-bad{background:rgba(217,63,63,.12);color:var(--bad)}
+  .b-pri{background:rgba(45,91,255,.12);color:var(--primary)}
+
+  /* ---------- Table ---------- */
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)}
+  th,td{padding:11px 16px;text-align:left;font-size:13.5px;border-bottom:1px solid var(--line)}
+  th{background:#f8fafd;font-weight:700;color:var(--head);font-size:12.5px;letter-spacing:.02em}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fafbfe}
+  td.code{font-weight:700;color:var(--primary);font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+  td.res{color:var(--sub)}
+
+  /* ---------- Lightbox ---------- */
+  #lb{
+    position:fixed;inset:0;background:rgba(12,16,28,.9);display:none;
+    align-items:center;justify-content:center;z-index:99;padding:32px;cursor:zoom-out;
+  }
+  #lb.on{display:flex}
+  #lb img{max-width:96%;max-height:92%;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  #lb .cap{position:absolute;bottom:22px;left:0;right:0;text-align:center;color:#fff;font-size:14px;opacity:.85;padding:0 40px}
+
+  footer{border-top:1px solid var(--line);padding:28px 0 46px;margin-top:10px;color:var(--sub);font-size:13px}
+  footer code{background:#eef2f9;padding:2px 7px;border-radius:5px;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="tag">博士课程 · 无线技术与工程实践 · 实验 3</div>
+    <h1>构建通信收发机 —— 成果展示</h1>
+    <p class="sub">
+      单载波 QPSK + RRC 成形物理层，承载 JPEG 分片视频流；
+      基于 ADALM-Pluto SDR 完成从纯仿真到真实空口视频传输的完整链路验证，
+      并附带公网信号接收（WiFi / GSM / LTE）作为保底功能。
+    </p>
+    <div class="meta">平台 MATLAB R2024b + ADALM-Pluto (325 MHz–3.8 GHz)　|　18 / 18 实验完成</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= KPI ================= -->
+  <div class="kpis">
+    <div class="kpi">
+      <div class="lab">空口视频还原 PSNR</div>
+      <div class="val" style="color:var(--ok)">36.76 <span style="font-size:16px">dB</span></div>
+      <div class="note">仿真 37.70 dB，仅差 0.94 dB</div>
+    </div>
+    <div class="kpi">
+      <div class="lab">物理层误码率</div>
+      <div class="val" style="color:var(--primary)">1.3e-5</div>
+      <div class="note">952 帧 / 99.79% 字节正确</div>
+    </div>
+    <div class="kpi">
+      <div class="lab">实验完成度</div>
+      <div class="val" style="color:var(--primary)">18 / 18</div>
+      <div class="note">W1~W7 + P0/P1/P2/E3/P5/P6</div>
+    </div>
+    <div class="kpi">
+      <div class="lab">最佳接收增益</div>
+      <div class="val" style="color:var(--warn)">10 <span style="font-size:16px">dB</span></div>
+      <div class="note">P1 公网接收增益扫描最优工作点</div>
+    </div>
+  </div>
+
+  <!-- ================= 1. 核心成果 ================= -->
+  <section>
+    <h2 class="sec"><span class="idx">01</span>端到端视频传输（核心成果）</h2>
+    <div class="sec-note">从 MATLAB 仿真到 ADALM-Pluto 真实空口，视频完整走通物理层。</div>
+    <div class="grid">
+      <figure>
+        <img src="plots/p6_overair_video.png" alt="P6 空口视频还原" loading="lazy">
+        <figcaption>
+          <div class="t">P6 空口视频还原<span class="badge b-ok">真实空口</span></div>
+          <div class="d">视频 19/20 帧还原，PSNR 36.76 dB，等效 16.3 fps；同轴短线 + RxGain 30 dB。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/p5_e2e_video.png" alt="P5 端到端联调" loading="lazy">
+        <figcaption>
+          <div class="t">P5 端到端联调<span class="badge b-pri">仿真</span></div>
+          <div class="d">视频 over QPSK：10/10 帧还原，PSNR 37.70 dB，16.3 fps；接收侧实时率 75.6%。</div>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= 2. 物理层 ================= -->
+  <section>
+    <h2 class="sec"><span class="idx">02</span>物理层与同步（W1 ~ W7）</h2>
+    <div class="sec-note">帧结构 → 频偏估计与纠正 → 真实空口星座 → 连续接收机 → 判决导向相位跟踪。</div>
+    <div class="grid">
+      <figure>
+        <img src="plots/w7_pll_tracking.png" alt="W7 DD-PLL 相位跟踪" loading="lazy">
+        <figcaption>
+          <div class="t">W7 DD-PLL 相位跟踪<span class="badge b-ok">关键</span></div>
+          <div class="d">真实空口的帧内相位斜坡（25.3°）被完整跟踪；加入 PLL 后 10 dB 解帧率 35% → 100%。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w7_compare.png" alt="W7 对比" loading="lazy">
+        <figcaption>
+          <div class="t">W7 有/无 PLL 对比</div>
+          <div class="d">8 dB 处 BER 1.6e-4，与理论 QPSK 1.9e-4 高度吻合；等效增益约 6 dB。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w3_overair_constellation.png" alt="W3 真实空口星座" loading="lazy">
+        <figcaption>
+          <div class="t">W3 真实空口星座图<span class="badge b-ok">真机</span></div>
+          <div class="d">Pluto 单音收发的 QPSK 星座，四点清晰可分。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w3_diag_constellation.png" alt="W3 诊断星座" loading="lazy">
+        <figcaption>
+          <div class="t">W3 诊断星座图</div>
+          <div class="d">未做频偏纠正时的星座旋转，用于定位频偏问题。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w6_sensitivity.png" alt="W6 灵敏度" loading="lazy">
+        <figcaption>
+          <div class="t">W6 接收机灵敏度</div>
+          <div class="d">解帧率 vs Eb/N0；归一化相关门限 0.60，灵敏度约 2 dB。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w6_frame_success.png" alt="W6 帧成功率" loading="lazy">
+        <figcaption>
+          <div class="t">W6 帧成功率</div>
+          <div class="d">20/20 帧解出（含 320 Hz 频偏）。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w2_freq_compensation.png" alt="W2 频偏纠正" loading="lazy">
+        <figcaption>
+          <div class="t">W2 频偏估计与纠正</div>
+          <div class="d">FFT 扫频找峰 + 相位补偿，纠正前后对比。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w1_frame_waveform.png" alt="W1 帧波形" loading="lazy">
+        <figcaption>
+          <div class="t">W1 帧结构与波形</div>
+          <div class="d">前导 + 数据段，296 符号 / 1208 采样每帧。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w4_image_transfer.png" alt="W4 图像传输" loading="lazy">
+        <figcaption>
+          <div class="t">W4 图像传输</div>
+          <div class="d">图像分块 over QPSK，3 次重复实验全 PASS。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/w5_measure.png" alt="W5 链路实测" loading="lazy">
+        <figcaption>
+          <div class="t">W5 链路实测</div>
+          <div class="d">实测频偏 −82.2 ± 4.5 Hz。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/demo_result.png" alt="综合演示" loading="lazy">
+        <figcaption>
+          <div class="t">综合演示</div>
+          <div class="d">QPSK 链路端到端结果汇总。</div>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= 3. 公网信号 ================= -->
+  <section>
+    <h2 class="sec"><span class="idx">03</span>公网信号接收（P1 · 保底功能）</h2>
+    <div class="sec-note">外接天线扫频 7 个候选频点，锁定最强信号并做完整分析 —— 过程中发现并定性了 ADC 削顶问题。</div>
+    <div class="grid">
+      <figure>
+        <img src="plots/p1_public_signal_WiFi%20ch6.png" alt="P1 WiFi ch6" loading="lazy">
+        <figcaption>
+          <div class="t">WiFi ch6 @ 2437 MHz<span class="badge b-bad">发现饱和</span></div>
+          <div class="d">收到 −5.1 dBFS；IQ 散点呈"填满整格的方形" = ADC 削顶的教科书特征。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/p1_gain_sweep.png" alt="P1 增益扫描" loading="lazy">
+        <figcaption>
+          <div class="t">增益扫描 4 档<span class="badge b-ok">闭环</span></div>
+          <div class="d">RxGain 30/23/10/0：噪声底单调下降 54.9 dB，证明 30 dB 时约 25 dB 是削顶伪噪声；最佳工作点 10 dB。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/p1_public_signal_GSM900%20D.png" alt="P1 GSM900" loading="lazy">
+        <figcaption>
+          <div class="t">GSM900 突发</div>
+          <div class="d">TDMA 突发结构，占空比约 12.5%。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/p1_public_signal_LTE%20Band.png" alt="P1 LTE" loading="lazy">
+        <figcaption>
+          <div class="t">LTE 连续谱</div>
+          <div class="d">OFDM 噪声状连续谱，占用度高。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/p1_public_signal_LockedFc.png" alt="P1 锁定频点" loading="lazy">
+        <figcaption>
+          <div class="t">锁定频点后详细分析</div>
+          <div class="d">锁定中心频率后的 PSD / 时域 / 包络 / 占用度全览。</div>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= 4. 参数与边界 ================= -->
+  <section>
+    <h2 class="sec"><span class="idx">04</span>链路预算与边界分析</h2>
+    <div class="sec-note">视频参数如何取舍？系统在多差的信噪比下会失效？</div>
+    <div class="grid">
+      <figure>
+        <img src="plots/e3_video_tradeoff.png" alt="E3 视频参数权衡" loading="lazy">
+        <figcaption>
+          <div class="t">E3 视频参数权衡</div>
+          <div class="d">分辨率/质量 vs 帧率/PSNR；发现内容复杂度是主导因素（简单/运动/复杂差 6~7 倍）。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/boundary_scan.png" alt="边界扫描" loading="lazy">
+        <figcaption>
+          <div class="t">SNR × p 边界扫描<span class="badge b-warn">悬崖效应</span></div>
+          <div class="d">Eb/N0 从 8 dB 降到 6 dB 时，单帧成功率 p 从 1.0 跌到 0.945，视频帧完成率从 100% 崩到 7%。</div>
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="plots/diag_p6_rxwave_constellation.png" alt="P6 诊断" loading="lazy">
+        <figcaption>
+          <div class="t">P6 接收波形与星座（诊断）</div>
+          <div class="d">用于定位 P6b 首跑 PSNR 虚低问题（最终确认是脚本参考帧错位，非链路问题）。</div>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ================= 5. 实验清单 ================= -->
+  <section>
+    <h2 class="sec"><span class="idx">05</span>实验清单（18 / 18）</h2>
+    <div class="sec-note">W 系列为物理层/链路基础，P 系列为课程实验 3 的实施步骤，E3 为参数权衡。</div>
+    <table>
+      <thead>
+        <tr><th style="width:70px">编号</th><th style="width:270px">实验内容</th><th style="width:110px">状态</th><th>关键结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="code">W1</td><td>帧结构 + 波形生成</td><td><span class="badge b-ok">已完成</span></td><td class="res">296 符号/帧，1208 采样/帧</td></tr>
+        <tr><td class="code">W2</td><td>频偏估计与纠正</td><td><span class="badge b-ok">已完成</span></td><td class="res">FFT 扫频找峰，残余 &lt; 1 Hz</td></tr>
+        <tr><td class="code">W3</td><td>Pluto 单音 TX/RX（真实空口）</td><td><span class="badge b-ok">已完成</span></td><td class="res">星座四点清晰；还原 "HELLO QPSK!"</td></tr>
+        <tr><td class="code">W4</td><td>多内容源（遥测 / 图像）</td><td><span class="badge b-ok">已完成</span></td><td class="res">图像分块传输 3 × PASS</td></tr>
+        <tr><td class="code">W5</td><td>链路实测</td><td><span class="badge b-ok">已完成</span></td><td class="res">实测频偏 −82.2 ± 4.5 Hz</td></tr>
+        <tr><td class="code">W6</td><td>连续接收机（归一化相关）</td><td><span class="badge b-ok">已完成</span></td><td class="res">20/20 帧 @ 320 Hz 频偏</td></tr>
+        <tr><td class="code">W7</td><td>DD-PLL 判决导向相位跟踪</td><td><span class="badge b-ok">已完成</span></td><td class="res">8 dB BER 1.6e-4（理论 1.9e-4）</td></tr>
+        <tr><td class="code">W7a</td><td>定时精调（TED + 插值）</td><td><span class="badge b-warn">评估后不做</span></td><td class="res">残余定时误差 0.06T，边际收益低</td></tr>
+        <tr><td class="code">P0</td><td>环境确认（JPEG 编解码路线）</td><td><span class="badge b-ok">已完成</span></td><td class="res">imwrite/imread 路线，5.3 ms/帧</td></tr>
+        <tr><td class="code">P1</td><td>公网信号接收（保底功能）</td><td><span class="badge b-ok">已完成</span></td><td class="res">WiFi ch6 @2437 MHz；诊断 ADC 饱和</td></tr>
+        <tr><td class="code">P2</td><td>视频分片链路（4B 分片头）</td><td><span class="badge b-ok">已完成</span></td><td class="res">比特级完全一致；6/6 鲁棒性通过</td></tr>
+        <tr><td class="code">E3</td><td>视频参数权衡</td><td><span class="badge b-ok">已完成</span></td><td class="res">三档模式（均衡档 176×144 @16.9 fps）</td></tr>
+        <tr><td class="code">P3</td><td>DD-PLL 集成进接收机</td><td><span class="badge b-ok">已完成</span></td><td class="res">10 dB 解帧率 35% → 100%</td></tr>
+        <tr><td class="code">P5</td><td>端到端联调（视频 over QPSK）</td><td><span class="badge b-ok">已完成</span></td><td class="res">视频 10/10，PSNR 37.70 dB</td></tr>
+        <tr><td class="code">P6a</td><td>空口链路质量评估</td><td><span class="badge b-ok">已完成</span></td><td class="res">三个 RxGain 全部 p = 1.0000</td></tr>
+        <tr><td class="code">P6b</td><td>空口视频传输</td><td><span class="badge b-ok">已完成</span></td><td class="res">视频 19/20，PSNR 36.76 dB</td></tr>
+        <tr><td class="code">BS</td><td>SNR × p 边界扫描</td><td><span class="badge b-ok">已完成</span></td><td class="res">悬崖效应：p 1.0→0.945 时完成率 100%→7%</td></tr>
+        <tr><td class="code">RS</td><td>全链路回归测试</td><td><span class="badge b-ok">已完成</span></td><td class="res">W1/W2/W4/W6/P2/E3/P5 全 PASS</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    数据来源：<code>results/</code> 下 31 个 .mat　·　<code>plots/</code> 下 23 张图　·　<code>博士课程-无线/</code> 下实验报告<br>
+    QPSK_Link_Teaching · 实验3 构建通信收发机 · MATLAB R2024b + ADALM-Pluto
+  </footer>
+
+</div>
+
+<div id="lb"><img id="lbimg" src="" alt=""><div class="cap" id="lbcap"></div></div>
+
+<script>
+  // 点击图片放大 (lightbox)
+  var lb = document.getElementById('lb');
+  var lbimg = document.getElementById('lbimg');
+  var lbcap = document.getElementById('lbcap');
+
+  document.querySelectorAll('figure img').forEach(function (img) {
+    img.addEventListener('click', function () {
+      lbimg.src = img.src;
+      var cap = img.closest('figure').querySelector('.t');
+      lbcap.textContent = cap ? cap.textContent.trim() : '';
+      lb.classList.add('on');
+    });
+  });
+  lb.addEventListener('click', function () { lb.classList.remove('on'); lbimg.src = ''; });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { lb.classList.remove('on'); lbimg.src = ''; }
+  });
+</script>
+
+</body>
+</html>
